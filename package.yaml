@@ -1,0 +1,13 @@
+name:                generic-validated
+version:             0.1.0.0
+description:         See README.md
+
+dependencies:
+- barbies
+- base
+- generic-deriving
+- higgledy
+- validation
+
+library:
+  source-dirs: src
