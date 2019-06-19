@@ -22,6 +22,18 @@ module Validated.Predicates
   , Predicates
   , testAll
 
+  , LessThan
+  , LessThanError (..)
+
+  , GreaterThan
+  , GreaterThanError (..)
+
+  , LessThanOrEqual
+  , LessThanOrEqualError (..)
+
+  , GreaterThanOrEqual
+  , GreaterThanOrEqualError (..)
+
   , SizeLessThan
   , SizeLessThanError (..)
 
