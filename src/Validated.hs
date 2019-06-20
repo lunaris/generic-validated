@@ -18,6 +18,7 @@
 
 module Validated where
 
+import Validated.Codes
 import Validated.Predicates
 import Validated.Validated
 
@@ -69,40 +70,3 @@ ex1 =
   HKD.build @PersonalDetails
     (mkR @Forename "Wolfgang Amadeus")
     (mkR @Surname "Mozart")
-
-
--- |Use generic trickery and `barbies` to turn that generic record of
---  all-the-errors into lists of strings suitable for turning into error
---  codes.
-ex2 :: HKD.HKD PersonalDetails (Const (Maybe [String]))
-ex2 =
-  B.bmapC @GenericallyValid foo ex1
-
--- |Pair those lists of strings with their field names, ready for serialisation
---  as JSON objects that communicate per-field error codes, for free!
-ex3 =
-  B.bprod (HKD.label ex2) ex2
-
-class (Generic a, ConNames (Rep a)) => GenericSum a
-instance (Generic a, ConNames (Rep a)) => GenericSum a
-
-class (Validated a,
-       AllPredicateErrors GenericSum (PredicatesFor a) (Unvalidated a))
-    => GenericallyValid a
-
-instance (Validated a,
-          AllPredicateErrors GenericSum (PredicatesFor a) (Unvalidated a))
-      =>  GenericallyValid a
-
-foo :: forall a. GenericallyValid a => Result a -> Const (Maybe [String]) a
-foo (Result x) =
-  Const $ case x of
-    V.Failure es -> Just (urk es)
-    V.Success x  -> Nothing
-
-urk :: AllPredicateErrors GenericSum ps a => ErrorsFor ps a -> [String]
-urk = \case
-  NilE ->
-    []
-  e :> es ->
-    maybe id ((:) . conNameOf) e (urk es)

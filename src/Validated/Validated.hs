@@ -2,9 +2,12 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
 
 module Validated.Validated
   ( Validated (..)
@@ -12,6 +15,8 @@ module Validated.Validated
   , mkR
 
   , ValidWhen (..)
+
+  , ValidatedOr
   ) where
 
 import Validated.Predicates
@@ -53,3 +58,11 @@ instance (Coercible src dst, Predicates ps src)
     = ps
   mk x =
     second coerce (testAll @ps @src x)
+
+class (Validated a,
+       AllPredicateErrors c (PredicatesFor a) (Unvalidated a))
+    => ValidatedOr c a
+
+instance (Validated a,
+          AllPredicateErrors c (PredicatesFor a) (Unvalidated a))
+      =>  ValidatedOr c a

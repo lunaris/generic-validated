@@ -3,11 +3,15 @@ version:             0.1.0.0
 description:         See README.md
 
 dependencies:
+- aeson
 - barbies
 - base
 - generic-deriving
-- higgledy
+- unordered-containers
 - validation
+
+- generic-lens
+- QuickCheck
 
 library:
   source-dirs: src
