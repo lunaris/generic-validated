@@ -1,0 +1,23 @@
+cabal-version: 2.4
+name:          generic-validated
+version:       0.1.0.0
+description:   See README.md
+build-type:    Simple
+
+library
+  hs-source-dirs: src
+  exposed-modules:
+    Validated
+    Validated.Codes
+    Validated.Predicates
+    Validated.Validated
+  build-depends:
+      aeson
+    , barbies
+    , base
+    , generic-deriving
+    , higgledy
+    , text
+    , unordered-containers
+    , validation
+  default-language: Haskell2010
