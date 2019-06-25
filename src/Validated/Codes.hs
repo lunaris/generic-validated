@@ -21,8 +21,8 @@ import Data.Functor.Const (Const (..))
 import Data.Functor.Product (Product (..))
 import qualified Data.Generic.HKD as HKD
 import qualified Data.Generic.HKD.Labels as HKD.Labels
-import qualified Data.Generic.HKD.Types as HKD.Types
 import qualified Data.HashMap.Strict as HM
+import qualified Data.Text as Tx
 import qualified Data.Validation as V
 import Generics.Deriving.ConNames (ConNames, conNameOf)
 import GHC.Generics (Generic, Rep)
@@ -31,12 +31,13 @@ sequenceErrorCodes
   :: forall a
    . ( Generic a
      , HKD.Labels.Label a
-     , HKD.Construct (V.Validation (HM.HashMap String [String])) a
-     , HKD.Types.ProductBC (HKD.HKD a)
-     , HKD.Types.GAllB (ValidatedOr GenericCodedSum) (Rep a)
+     , HKD.Construct (V.Validation (HM.HashMap Tx.Text [Tx.Text])) a
+     , B.ProductB (HKD.HKD a)
+     , B.ConstraintsB (HKD.HKD a)
+     , B.AllB (ValidatedOr GenericCodedSum) (HKD.HKD a)
      )
   => HKD.HKD a Result
-  -> V.Validation (HM.HashMap String [String]) a
+  -> V.Validation (HM.HashMap Tx.Text [Tx.Text]) a
 sequenceErrorCodes x =
   let ls = HKD.label @a
       es = B.bmapC @(ValidatedOr GenericCodedSum) errorCodesList x
@@ -45,10 +46,10 @@ sequenceErrorCodes x =
 
 errorCodesMap
   :: Const String a
-  -> V.Validation [String] a
-  -> V.Validation (HM.HashMap String [String]) a
+  -> V.Validation [Tx.Text] a
+  -> V.Validation (HM.HashMap Tx.Text [Tx.Text]) a
 errorCodesMap (Const k)
-  = first (HM.singleton k)
+  = first (HM.singleton (Tx.pack k))
 
 class (Generic a, ConNames (Rep a)) => GenericCodedSum a
 instance (Generic a, ConNames (Rep a)) => GenericCodedSum a
@@ -57,7 +58,7 @@ errorCodesList
   :: forall a
    . ValidatedOr GenericCodedSum a
   => Result a
-  -> V.Validation [String] a
+  -> V.Validation [Tx.Text] a
 errorCodesList (Result x) =
   case x of
     V.Failure es -> V.Failure (errorCodesList' es)
@@ -66,7 +67,7 @@ errorCodesList (Result x) =
 errorCodesList'
   :: AllPredicateErrors GenericCodedSum ps a
   => ErrorsFor ps a
-  -> [String]
+  -> [Tx.Text]
 errorCodesList' = \case
   NilE    -> []
-  e :> es -> maybe id ((:) . conNameOf) e (errorCodesList' es)
+  e :> es -> maybe id ((:) . Tx.pack . conNameOf) e (errorCodesList' es)
