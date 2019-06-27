@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
@@ -22,14 +23,23 @@ module GenericValidated.Predicates.Text
 
   , LengthGreaterThanOrEqual
   , LengthGreaterThanOrEqualError (..)
+
+  , MatchesRegex
+  , MatchesRegexError (..)
+
+  , DoesNotMatchRegex
+  , DoesNotMatchRegexError (..)
   ) where
 
 import GenericValidated.Predicates.Types
 import GenericValidated.Predicates.Util
 
+import Data.Proxy (Proxy (..))
 import qualified Data.Text as Tx
 import GHC.Generics (Generic)
-import GHC.TypeLits (KnownNat, Nat)
+import GHC.TypeLits (KnownNat, KnownSymbol, Nat, Symbol, symbolVal)
+import Text.Regex.TDFA ((=~))
+import Text.Regex.TDFA.Text ()
 
 -------------------------------------------------------------------------------
 --  Predicates over strict `Text` values
@@ -82,3 +92,31 @@ instance KnownNat n => Predicate (LengthLessThanOrEqual n) Tx.Text where
     = LengthLessThanOrEqualError
   test =
     LengthTooGreat `when` \x -> Tx.length x > numVal @n
+
+data MatchesRegex (regex :: Symbol)
+
+data MatchesRegexError
+  = RegexNotMatched
+  deriving stock (Generic, Show)
+
+instance KnownSymbol regex => Predicate (MatchesRegex regex) Tx.Text where
+  type PredicateError (MatchesRegex regex) Tx.Text
+    = MatchesRegexError
+  test =
+    RegexNotMatched `when` \x -> not (x =~ textVal @regex)
+
+data DoesNotMatchRegex (regex :: Symbol)
+
+data DoesNotMatchRegexError
+  = RegexMatched
+  deriving stock (Generic, Show)
+
+instance KnownSymbol regex => Predicate (DoesNotMatchRegex regex) Tx.Text where
+  type PredicateError (DoesNotMatchRegex regex) Tx.Text
+    = DoesNotMatchRegexError
+  test =
+    RegexMatched `when` \x -> x =~ textVal @regex
+
+textVal :: forall s. KnownSymbol s => Tx.Text
+textVal =
+  Tx.pack (symbolVal (Proxy @s))

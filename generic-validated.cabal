@@ -21,6 +21,8 @@ library
     , base
     , generic-deriving
     , higgledy
+    , regex-tdfa
+    , regex-tdfa-text
     , text
     , unordered-containers
     , validation
