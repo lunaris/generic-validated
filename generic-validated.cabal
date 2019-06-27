@@ -7,10 +7,14 @@ build-type:    Simple
 library
   hs-source-dirs: src
   exposed-modules:
-    Validated
-    Validated.Codes
-    Validated.Predicates
-    Validated.Validated
+    GenericValidated
+    GenericValidated.Codes
+    GenericValidated.Predicates
+    GenericValidated.Predicates.Base
+    GenericValidated.Predicates.Text
+    GenericValidated.Predicates.Types
+    GenericValidated.Predicates.Util
+    GenericValidated.Validated
   build-depends:
       aeson
     , barbies

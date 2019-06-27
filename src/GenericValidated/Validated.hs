@@ -9,7 +9,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
-module Validated.Validated
+module GenericValidated.Validated
   ( Validated (..)
   , Result (..)
   , mkR
@@ -19,7 +19,7 @@ module Validated.Validated
   , ValidatedOr
   ) where
 
-import Validated.Predicates
+import GenericValidated.Predicates
 
 import Data.Bifunctor (second)
 import Data.Coerce (Coercible, coerce)

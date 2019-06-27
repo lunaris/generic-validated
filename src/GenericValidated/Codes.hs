@@ -6,13 +6,13 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Validated.Codes
+module GenericValidated.Codes
   ( GenericCodedSum
   , sequenceErrorCodes
   ) where
 
-import Validated.Predicates
-import Validated.Validated
+import GenericValidated.Predicates
+import GenericValidated.Validated
 
 import qualified Data.Aeson as Ae
 import qualified Data.Barbie as B

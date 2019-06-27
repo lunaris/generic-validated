@@ -15,15 +15,15 @@ This is a library for doing `Validation` using `deriving via` and GHC
 
 import GHC.Generics (Generic)
 import qualified Data.Generic.HKD as HKD
-import qualified Generic.Validated as GV
+import qualified GenericValidated as GV
 
 newtype Forename
   = Forename String
   deriving stock (Eq, Show)
   deriving GV.Validated
     via (Forename `GV.ValidWhen`
-      '( '[ GV.SizeLessThan 5
-          , GV.SizeLessThan 10
+      '( '[ GV.LengthLessThan 5
+          , GV.LengthLessThan 10
           ]
        , String
        )
@@ -34,8 +34,8 @@ newtype Surname
   deriving stock (Eq, Show)
   deriving GV.Validated
     via (Forename `GV.ValidWhen`
-      '( '[ GV.SizeLessThan 5
-          , GV.SizeLessThan 10
+      '( '[ GV.LengthLessThan 5
+          , GV.LengthLessThan 10
           ]
        , String
        )
