@@ -10,7 +10,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module GenericValidated.Predicates.Base
-  ( LessThan
+  ( Present
+  , PresentError (..)
+
+  , LessThan
   , LessThanError (..)
 
   , GreaterThan
@@ -46,6 +49,22 @@ import qualified Data.Validation as V
 -------------------------------------------------------------------------------
 --  Library-supplied predicates
 -------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+--  Data which is required
+-------------------------------------------------------------------------------
+
+data Present
+
+data PresentError
+  = DataMissing
+  deriving stock (Generic, Show)
+
+instance Predicate Present a where
+  type PredicateError Present a
+    = PresentError
+  test =
+    V.Success
 
 -------------------------------------------------------------------------------
 --  Predicates over `Num`s

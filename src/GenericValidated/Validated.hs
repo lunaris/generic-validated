@@ -1,11 +1,16 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
@@ -13,6 +18,7 @@ module GenericValidated.Validated
   ( Validated (..)
   , Result (..)
   , mkR
+  , maybeMkR
 
   , ValidWhen (..)
 
@@ -21,10 +27,12 @@ module GenericValidated.Validated
 
 import GenericValidated.Predicates
 
+import qualified Data.Aeson as Ae
 import Data.Bifunctor (second)
 import Data.Coerce (Coercible, coerce)
 import Data.Kind (Constraint, Type)
 import qualified Data.Validation as V
+import GHC.Generics (Generic)
 
 class Validated (a :: Type) where
   type Unvalidated a
@@ -47,6 +55,21 @@ mkR
 mkR =
   coerce (mk @a)
 
+maybeMkR
+  :: forall a ps otherPs
+   . ( Validated a
+     , PredicatesFor a ~ ps
+     , PredicatesWith Present ps (Unvalidated a)
+     )
+  => Maybe (Unvalidated a)
+  -> Result a
+maybeMkR = \case
+  Nothing ->
+    Result $ V.Failure $
+      errorFor @Present DataMissing
+  Just x ->
+    mkR x
+
 newtype ValidWhen (dst :: Type) (satisfies :: ([Type], Type))
   = ValidWhen dst
 
@@ -66,3 +89,26 @@ class (Validated a,
 instance (Validated a,
           AllPredicateErrors c (PredicatesFor a) (Unvalidated a))
       =>  ValidatedOr c a
+
+newtype AlwaysValid a
+  = AlwaysValid { getAlwaysValid :: a }
+  deriving stock (Eq, Generic, Ord, Show)
+  deriving newtype (Ae.FromJSON, Ae.ToJSON)
+  deriving Validated
+    via (AlwaysValid a `ValidWhen`
+      '( '[]
+       , a
+       )
+    )
+
+newtype Required a
+  = Required { getRequired :: a }
+  deriving stock (Eq, Generic, Ord, Show)
+  deriving newtype (Ae.FromJSON, Ae.ToJSON)
+  deriving Validated
+    via (Required a `ValidWhen`
+      '( '[ Present
+          ]
+       , a
+       )
+    )
