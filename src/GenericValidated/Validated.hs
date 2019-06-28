@@ -23,6 +23,9 @@ module GenericValidated.Validated
   , ValidWhen (..)
 
   , ValidatedOr
+
+  , AlwaysValid (..)
+  , Required (..)
   ) where
 
 import GenericValidated.Predicates
