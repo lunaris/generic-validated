@@ -107,7 +107,8 @@ class (Predicate q a, Predicates ps a) => PredicatesWith q ps a where
     -> PredicateError q a
     -> ErrorsFor ps a
 
-instance (Predicate q a, Predicates ps a)
+instance {-# OVERLAPPING #-}
+         (Predicate q a, Predicates ps a)
       =>  PredicatesWith q (q ': ps) a where
   errorFor' _ e =
     Just e :> noErrors
