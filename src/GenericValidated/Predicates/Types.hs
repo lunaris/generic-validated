@@ -112,7 +112,8 @@ instance (Predicate q a, Predicates ps a)
   errorFor' _ e =
     Just e :> noErrors
 
-instance (Predicate p a, PredicatesWith q ps a)
-      => PredicatesWith q (p ': ps) a where
+instance {-# OVERLAPPABLE #-}
+         (Predicate p a, PredicatesWith q ps a)
+      =>  PredicatesWith q (p ': ps) a where
   errorFor' prx e =
     Nothing :> errorFor' prx e
